@@ -28,15 +28,8 @@ fn main() {
         }
     }
 
-    let identifier = if let Ok(channel) = std::env::var("CHANNEL") {
-        match channel.as_str() {
-            "nightly" => "com.gitbutler.app.nightly",
-            "release" => "com.gitbutler.app",
-            _ => "com.gitbutler.app.dev",
-        }
-    } else {
-        "com.gitbutler.app.dev"
-    };
+    // Same release app identity as the desktop build.
+    let identifier = "com.gitbutler.app";
     println!("cargo:rustc-env=IDENTIFIER={identifier}");
 
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {

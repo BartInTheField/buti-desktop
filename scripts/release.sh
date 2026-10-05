@@ -137,8 +137,8 @@ ARCH="$(arch)"
 [ -z "${TAURI_SIGNING_PRIVATE_KEY-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY is not set"
 [ -z "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD is not set"
 
-if [ "$CHANNEL" != "release" ] && [ "$CHANNEL" != "nightly" ]; then
-	error "--channel must be either 'release' or 'nightly'"
+if [ "$CHANNEL" != "release" ]; then
+	error "--channel must be 'release'"
 fi
 
 if [ "$DO_SIGN" = "true" ]; then
@@ -196,10 +196,6 @@ elif [ "$OS" = "macos" ]; then
 else
 	echo "Unsupported OS: $OS"
 	exit 1
-fi
-
-if [ "$CHANNEL" = "nightly" ]; then
-	FEATURES="$FEATURES nightly"
 fi
 
 # update the version in the tauri release config

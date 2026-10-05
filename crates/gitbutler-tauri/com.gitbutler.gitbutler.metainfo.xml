@@ -5,8 +5,8 @@
   <metadata_license>FSFAP</metadata_license>
   <project_license>LicenseRef-FSL-1.1-MIT=https://github.com/gitbutlerapp/gitbutler/blob/master/LICENSE.md</project_license>
 
-  <name>GitButler</name>
-  <summary>Git, finally designed for humans</summary>
+  <name>buti</name>
+  <summary>Parallel agentic workflow, on top of GitButler</summary>
 
   <developer id="com.gitbutler">
     <name>GitButler Inc.</name>
@@ -14,8 +14,7 @@
 
   <description>
     <p>
-      GitButler is the Git-backed change management tool for modern, AI coding workflows.
-      Parallel and stacked branches, unlimited undo, agent integrations, and more. It's Git, refined.
+      Parallel agentic workflow. Code review your agent can act on. On top of GitButler.
     </p>
   </description>
 

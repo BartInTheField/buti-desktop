@@ -1327,7 +1327,7 @@ async function storeFakeGitHubEnterprisePat(page: Page, server: FakeGitHubServer
 function mirrorFakeCredentialForCli(gitbutler: GitButler) {
 	const credentialPath = gitbutler.pathInWorkdir("../config/git-credentials");
 	const serverCredential = readFileSync(credentialPath, "utf8");
-	const cliCredential = serverCredential.replace("development-", "com.gitbutler.app.dev-");
+	const cliCredential = serverCredential.replace("development-", "com.gitbutler.app-");
 	writeFileSync(credentialPath, `${serverCredential.trimEnd()}\n${cliCredential}`);
 }
 

@@ -76,9 +76,6 @@ pnpm dev:desktop
 # Run with debug logs
 LOG_LEVEL=debug pnpm dev:desktop
 
-# Run web app
-pnpm dev:web
-
 # Run UI component storybook
 pnpm dev:ui
 ```
@@ -93,7 +90,7 @@ pnpm build
 pnpm build:desktop
 
 # Build for production (used for releases)
-pnpm tauri build --features devtools --config crates/gitbutler-tauri/tauri.conf.nightly.json
+pnpm tauri build --features builtin-but --config crates/gitbutler-tauri/tauri.conf.release.json
 ```
 
 ## Testing

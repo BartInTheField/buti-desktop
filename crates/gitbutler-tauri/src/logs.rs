@@ -13,7 +13,7 @@ pub fn init(
 ) {
     fs::create_dir_all(logs_dir).expect("failed to create logs dir");
 
-    let log_prefix = "GitButler";
+    let log_prefix = "buti";
     let log_suffix = "log";
     let max_log_files = 14;
     remove_old_logs(logs_dir).ok();
@@ -111,13 +111,7 @@ fn should_log(level: Option<Level>, meta: &tracing::Metadata<'_>) -> bool {
 fn get_server_addr(app_handle: &AppHandle) -> (Ipv4Addr, u16) {
     let config = app_handle.config();
     let product_name = config.product_name.as_ref().expect("product name not set");
-    let port = if product_name.eq("GitButler") {
-        6667
-    } else if product_name.eq("GitButler Nightly") {
-        6668
-    } else {
-        6669
-    };
+    let port = if product_name.eq("buti") { 6667 } else { 6669 };
     (Ipv4Addr::LOCALHOST, port)
 }
 
@@ -195,7 +189,8 @@ fn remove_old_logs(log_directory: &Path) -> anyhow::Result<()> {
 
         let filename = entry.file_name();
         let filename = filename.to_str()?;
-        if !filename.starts_with("GitButler.log") {
+        // Also drop logs written before the buti product rename.
+        if !(filename.starts_with("buti.log") || filename.starts_with("GitButler.log")) {
             return None;
         }
 

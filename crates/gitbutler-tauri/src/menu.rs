@@ -30,7 +30,16 @@ pub fn build<R: Runtime>(handle: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let mac_menu = {
         #[cfg_attr(feature = "disable-auto-updates", allow(unused_mut))]
         let mut menu = SubmenuBuilder::new(handle, app_name)
-            .about(Some(AboutMetadata::default()))
+            .about(Some(AboutMetadata {
+                copyright: Some(
+                    "buti, on top of GitButler. Copyright © 2023-2026 GitButler.".into(),
+                ),
+                website: Some("https://github.com/BartInTheField/buti".into()),
+                comments: Some(
+                    "Parallel agentic workflow. Code review your agent can act on.".into(),
+                ),
+                ..Default::default()
+            }))
             .separator()
             .item(&settings_menu);
 
@@ -184,6 +193,11 @@ pub fn build<R: Runtime>(handle: &AppHandle<R>) -> tauri::Result<Menu<R>> {
         .text("help/bluesky", "Bluesky")
         .text("help/x", "X")
         .separator()
+        .item(
+            &MenuItemBuilder::with_id("help/product", "buti, on top of GitButler")
+                .enabled(false)
+                .build(handle)?,
+        )
         .item(
             &MenuItemBuilder::with_id(
                 "help/version",

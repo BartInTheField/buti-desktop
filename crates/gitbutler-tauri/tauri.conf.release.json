@@ -1,5 +1,5 @@
 {
-	"productName": "GitButler",
+	"productName": "buti",
 	"identifier": "com.gitbutler.app",
 	"build": {
 		"beforeBuildCommand": "bash ./crates/gitbutler-tauri/tauri-before-build-command.sh production"
@@ -13,7 +13,7 @@
 			"icons/release/icon.icns",
 			"icons/release/icon.ico"
 		],
-		"externalBin": ["to be replaced by `release.sh`"]
+		"externalBin": ["gitbutler-git-askpass"]
 	},
 	"plugins": {
 		"updater": {

@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
     let mut tauri_context = generate_context!();
     but_secret::secret::set_application_namespace(&tauri_context.config().identifier);
 
-    // Set the macOS notification bundle ID so notifications appear as GitButler.
+    // Set the macOS notification bundle ID so notifications use this app's identity.
     #[cfg(target_os = "macos")]
     {
         if let Err(e) = notify_rust::set_application(&tauri_context.config().identifier) {
@@ -121,7 +121,7 @@ fn main() -> anyhow::Result<()> {
 
                 // TODO(mtsgrd): Is there a better way to disable devtools in E2E tests?
                 #[cfg(debug_assertions)]
-                if tauri_app.config().product_name.as_deref() != Some("GitButler Test") {
+                if tauri_app.config().product_name.as_deref() != Some("buti Test") {
                     window.open_devtools();
                 }
 

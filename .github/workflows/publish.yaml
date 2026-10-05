@@ -1,19 +1,16 @@
 name: "Publish"
+# Desktop release jobs stay pointed at GitButler's update feed and release
+# bucket so this fork can still sync the desktop app with upstream.
 on:
-  schedule:
-    # every day at 1am UTC, 3AM CEST or 2AM CET.
-    - cron: "0 1 * * *"
-
   workflow_dispatch:
     inputs:
       channel:
         type: choice
         required: true
         description: channel
-        default: nightly
+        default: release
         options:
           - release
-          - nightly
       bump:
         type: choice
         required: true
@@ -25,7 +22,7 @@ on:
           - minor
           - major
       dry_run:
-        description: Perform a dry run that builds the artifacts and uploads them to GitHub, but does not publish them to end users. Useful to test experimental features before they go out in a nightly.
+        description: Perform a dry run that builds the artifacts and uploads them to GitHub, but does not publish them to end users.
         type: boolean
         required: true
         default: false
@@ -42,13 +39,10 @@ jobs:
       - name: Consume input variables
         shell: bash
         run: |
-          VITEMODE=nightly
-          if [[ "${{ github.event.inputs.channel }}" == "release" ]]; then
-            VITEMODE=production
-          fi
+          VITEMODE=production
 
           echo "vitemode=$VITEMODE" >> $GITHUB_ENV
-          echo "channel=${{ github.event.inputs.channel || 'nightly' }}" >> $GITHUB_ENV
+          echo "channel=release" >> $GITHUB_ENV
           echo "bump=${{ github.event.inputs.bump || 'patch' }}" >> $GITHUB_ENV
       - name: Calculate next version
         shell: bash
@@ -136,14 +130,14 @@ jobs:
       - name: Rust Cache ${{ matrix.target }}
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
-          shared-key: app-release-build-${{ github.event.inputs.channel || 'nightly' }}${{ matrix.target }}${{ matrix.platform }}
+          shared-key: app-release-build-release${{ matrix.target }}${{ matrix.platform }}
       - name: Init Node Environment
         uses: ./.github/actions/init-env-node
 
       - name: Consume input variables
         shell: bash
         run: |
-          echo "channel=${{ github.event.inputs.channel || 'nightly' }}" >> $GITHUB_ENV
+          echo "channel=release" >> $GITHUB_ENV
           echo "bump=${{ github.event.inputs.bump || 'patch' }}" >> $GITHUB_ENV
 
       - name: Calculate next version
@@ -216,42 +210,6 @@ jobs:
           APPIMAGE_KEY_PASSPHRASE: ${{ secrets.APPIMAGE_KEY_PASSPHRASE }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
-      # Profiling build for debugging purposes
-      - name: Build profiling CLI
-        if: matrix.platform == 'ubuntu-22.04' && env.channel == 'nightly'
-        shell: bash
-        env:
-          VERSION: ${{ env.version }}
-          CHANNEL: nightly
-          GITBUTLER_REQUIRE_MCP_APP: "1"
-          CARGO_PROFILE_RELEASE_LTO: fat
-          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
-          CARGO_PROFILE_RELEASE_OPT_LEVEL: s
-          CARGO_PROFILE_RELEASE_DEBUG: "2"
-          CARGO_PROFILE_RELEASE_STRIP: none
-          CARGO_PROFILE_RELEASE_SPLIT_DEBUGINFO: "off"
-        run: |
-          cargo build --locked --release -p but --bin but \
-            --features nightly \
-            --target x86_64-unknown-linux-gnu \
-            --target-dir target/profiling
-
-          binary=target/profiling/x86_64-unknown-linux-gnu/release/but
-          "$binary" --version
-          readelf -S --wide "$binary" | grep '\.debug_info' >/dev/null
-
-          mkdir -p profiling
-          tar -czf profiling/but-profiling.tar.gz \
-            -C "$(dirname "$binary")" but
-
-      - name: Upload profiling artifact
-        if: matrix.platform == 'ubuntu-22.04' && env.channel == 'nightly'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: "profiling-nightly-linux-x86_64-${{ github.run_number }}"
-          path: profiling/but-profiling.tar.gz
-          if-no-files-found: error
-
       - name: Set artifact name suffix
         shell: bash
         run: |
@@ -290,7 +248,7 @@ jobs:
     # When the signing machine is offline, jobs queue for up to 24h; let each
     # newer run cancel the previous stuck one instead of stacking behind it.
     concurrency:
-      group: sign-windows-${{ github.event.inputs.channel || 'nightly' }}
+      group: sign-windows-release
       cancel-in-progress: true
     strategy:
       matrix:
@@ -473,22 +431,6 @@ jobs:
           aws_bucket: "releases.gitbutler.com"
           source_dir: "release-s3/"
           destination_dir: "releases/${{ needs.build-tauri.outputs.channel }}/${{ env.version }}-${{ github.run_number }}"
-
-      - name: Download profiling artifact
-        if: matrix.platform == 'ubuntu-22.04' && needs.build-tauri.outputs.channel == 'nightly'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: "profiling-nightly-linux-x86_64-${{ github.run_number }}"
-          path: profiling
-      - name: Upload profiling artifact to S3
-        if: matrix.platform == 'ubuntu-22.04' && needs.build-tauri.outputs.channel == 'nightly'
-        uses: shallwefootball/s3-upload-action@0d261a6f15b3b2e209dfebdecace4b100c04f95b # commit 0d261a6
-        with:
-          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_bucket: "releases.gitbutler.com"
-          source_dir: "profiling/"
-          destination_dir: "profiling/nightly/${{ env.version }}-${{ github.run_number }}"
 
   publish-windows:
     needs: [sign-tauri, build-tauri]
