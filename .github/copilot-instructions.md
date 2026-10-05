@@ -226,7 +226,7 @@ The `crates/` directory contains ~65 Rust crates organized by functionality:
 Located in `.github/workflows/`:
 
 - `push.yaml`: Main CI for linting, building, and testing on push
-- `publish.yaml`: Release builds for different platforms
+- `release.yml`: Hourly CalVer desktop releases
 - `test-e2e.yml`: E2E tests (Playwright and blackbox)
 - `test-client-fe-integration.yml`: Frontend integration tests
 

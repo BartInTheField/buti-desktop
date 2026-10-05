@@ -439,14 +439,13 @@ $ pnpm tauri icon path/to/icon.png
 
 ### Release
 
-Building is done via [GitHub Action](https://github.com/gitbutlerapp/gitbutler/actions/workflows/publish.yaml).
-Go to the link and select `Run workflow` from the desired branch.
+Building a release is [`.github/workflows/release.yml`](.github/workflows/release.yml).
+It runs every hour, and you can start it by hand. See [docs/releases.md](docs/releases.md).
 
 ### Versioning
 
-When running the [release action](https://github.com/gitbutlerapp/gitbutler/actions/workflows/publish.yaml),
-you will have to choose one of `major`, `minor`, or `patch` release type. Action will generate a new version based on your input and current
-version found at `https://app.gitbutler.com/releases`.
+Tags are CalVer `YYYY.MM.DD.N`. The app version is the semver form `YYYY.MMDD.N`.
+See [docs/releases.md](docs/releases.md).
 
 ### Publishing
 
