@@ -13,7 +13,6 @@ this order:
 
 - `crates/` - Rust crates.
 - `apps/desktop/` - Tauri/Svelte desktop app.
-- `apps/web/` - Svelte web app.
 - `apps/lite/` - Electron/React desktop app.
 - `packages/` - shared TypeScript packages, including the SDK.
 - `e2e/` - Playwright, WebdriverIO, and blackbox end-to-end tests.

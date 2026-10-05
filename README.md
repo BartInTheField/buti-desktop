@@ -13,9 +13,7 @@
 
 The wordmark is `buti`, lowercase, from [BartInTheField/buti](https://github.com/BartInTheField/buti). This repository is the desktop app: a [Tauri](https://tauri.app/) and Svelte client, plus the Electron desktop client. It is a fork of [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler), published as [`BartInTheField/buti-desktop`](https://github.com/BartInTheField/buti-desktop). Upstream license notices stay in [`LICENSE.md`](LICENSE.md) (Functional Source License 1.1, with a future MIT grant).
 
-## Sync with upstream
-
-Bundle ids (`com.gitbutler.app`, `com.gitbutler.lite`), deep-link schemes, and the desktop update feed (`https://app.gitbutler.com`) are unchanged. The desktop publish workflow still targets GitButler’s release bucket. That keeps the installed app on the same identity as upstream, so it can take GitButler desktop updates and this tree can merge upstream commits without rewriting data directories or the updater.
+The web app and the standalone CLI installer are not part of this repo. The Rust workspace stays, because the desktop app embeds `but`. Bundle ids remain `com.gitbutler.app` and `com.gitbutler.lite`.
 
 ```bash
 git remote add upstream https://github.com/gitbutlerapp/gitbutler.git
@@ -23,23 +21,14 @@ git fetch upstream
 git merge upstream/master
 ```
 
-Expect conflicts only where this fork’s branding sits: product display names, this README, the top of `DEVELOPMENT.md`, and the disabled CLI-installer / web CI jobs. Shared crates, `apps/desktop`, `apps/lite`, and the desktop CI jobs are meant to merge through.
-
 ## What ships
 
-| Kept | Role |
+| Path | Role |
 | --- | --- |
 | `apps/desktop` + `crates/gitbutler-tauri` | Tauri/Svelte desktop app (product name **buti**) |
 | `apps/lite` | Electron desktop app (product name **buti**) |
 | Desktop packages (`ui-svelte`, `ui-react`, `shared`, `core`, `but-sdk`, …) | UI and SDK the desktop clients build against |
-| Rust workspace members, including `but` | Shared engine. Release builds embed `but` via the `builtin-but` feature. `but-server` still serves the desktop UI in a browser. |
-
-| Not shipped (code kept) | How it is turned off |
-| --- | --- |
-| Standalone `but` CLI installer (`but-installer`, `scripts/install.sh` publish) | `.github/workflows/push.yaml` installer jobs are `if: false` |
-| `apps/web` | `.github/workflows/test-web.yml` no longer runs on push or pull request |
-
-Nothing was deleted from the workspace. Crate names and npm package names stay `@gitbutler/*` / `gitbutler-*` so desktop builds and upstream merges keep working.
+| Rust workspace, including `but` | Engine embedded in release builds via the `builtin-but` feature |
 
 ## Build and run the desktop app
 
@@ -89,5 +78,4 @@ Open `http://localhost:1420`.
 - There is no system tray. The dock, taskbar, and window title follow the product name `buti`.
 - In-app Help links still open upstream docs and `gitbutlerapp/gitbutler`.
 - The shared settings directory name remains `gitbutler`.
-- `apps/web` and the `but` CLI sources are still in the tree. Re-enable their CI jobs by restoring the upstream `if` conditions when you want them to ship again.
 - A buti-owned update server would be a later change. This fork keeps GitButler’s feed on purpose.

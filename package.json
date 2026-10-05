@@ -9,7 +9,6 @@
 	"packageManager": "pnpm@12.5.1",
 	"scripts": {
 		"dev:ui": "pnpm --filter @gitbutler/ui-svelte storybook",
-		"dev:web": "turbo watch --filter @gitbutler/web dev",
 		"dev:lite": "turbo watch --filter @gitbutler/lite dev",
 		"demos:lite": "pnpm --filter @gitbutler/lite demos",
 		"dev:desktop": "cross-env CARGO_TARGET_DIR=\"$PNPM_SCRIPT_SRC_DIR/target/tauri\" pnpm dev:desktop-with-env",

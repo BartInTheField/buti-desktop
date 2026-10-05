@@ -76,9 +76,6 @@ pnpm dev:desktop
 # Run with debug logs
 LOG_LEVEL=debug pnpm dev:desktop
 
-# Run web app
-pnpm dev:web
-
 # Run UI component storybook
 pnpm dev:ui
 ```

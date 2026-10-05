@@ -35,7 +35,6 @@ jobs:
               - '!.oxlintrc.json'
               - '!deny.toml'
               - '!scripts/**'
-              - '!apps/web/**'
               - '!apps/lite/**'
               - '!crates/but/**'
               - '!crates/but-clap/**'

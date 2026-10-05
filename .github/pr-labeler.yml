@@ -12,10 +12,6 @@ CLI:
   - changed-files:
       - any-glob-to-any-file: apps/desktop/**/*
 
-"@gitbutler/web":
-  - changed-files:
-      - any-glob-to-any-file: apps/web/**/*
-
 "@gitbutler/lite":
   - changed-files:
       - any-glob-to-any-file: apps/lite/**/*
