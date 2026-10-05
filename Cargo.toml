@@ -101,17 +101,14 @@ members = [
     ##
     ### Binaries
     ##
-    # Strive for testing main functionality and journeys where applicable.
-    "crates/but-debug",
+    # Embedded in the desktop app.
     "crates/but",
-    # Should be functionally equivalent to `gitbutler-tauri`
+    # Same API as the Tauri shell, used by desktop end-to-end tests.
     "crates/but-server",
     # Should be reviewed to mostly use `but-api`, to be renamed to `but-tauri` or something.
     "crates/gitbutler-tauri",
     # GitButler installation binary
     "crates/but-installer",
-    # Documentation binary
-    "crates/but-clap",
 
     ##
     ### Utilities
@@ -120,7 +117,6 @@ members = [
     "crates/but-ts",
     # Node.js SDK via napi-rs
     "crates/but-napi",
-    "crates/but-debugging",
 
 
     ##
@@ -139,9 +135,7 @@ edition = "2024"
 rust-version = "1.95"
 
 [workspace.dependencies]
-but-debug = { path = "crates/but-debug" }
 but = { path = "crates/but" }
-but-debugging = { path = "crates/but-debugging" }
 but-testsupport = { path = "crates/but-testsupport" }
 but-rebase = { path = "crates/but-rebase" }
 but-core = { path = "crates/but-core" }

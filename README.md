@@ -11,9 +11,9 @@
   On top of <strong>GitButler</strong>
 </p>
 
-The wordmark is `buti`, lowercase, from [BartInTheField/buti](https://github.com/BartInTheField/buti). This repository is the desktop app: a [Tauri](https://tauri.app/) and Svelte client, plus the Electron desktop client. It is a fork of [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler), published as [`BartInTheField/buti-desktop`](https://github.com/BartInTheField/buti-desktop). Upstream license notices stay in [`LICENSE.md`](LICENSE.md) (Functional Source License 1.1, with a future MIT grant).
+The wordmark is `buti`, lowercase, from [BartInTheField/buti](https://github.com/BartInTheField/buti). This repository is the desktop app: the Tauri and Svelte client in `apps/desktop`. It is a fork of [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler), published as [`BartInTheField/buti-desktop`](https://github.com/BartInTheField/buti-desktop). Upstream license notices stay in [`LICENSE.md`](LICENSE.md) (Functional Source License 1.1, with a future MIT grant).
 
-The web app and the standalone CLI installer are not part of this repo. The Rust workspace stays, because the desktop app embeds `but`. Bundle ids remain `com.gitbutler.app` and `com.gitbutler.lite`.
+`crates/` is the forked GitButler engine that `apps/desktop` links. It is not a separate CLI or web product. The web app, the Electron app, and the standalone installer are not in this repo. The bundle id stays `com.gitbutler.app`.
 
 ```bash
 git remote add upstream https://github.com/gitbutlerapp/gitbutler.git
@@ -25,10 +25,10 @@ git merge upstream/master
 
 | Path | Role |
 | --- | --- |
-| `apps/desktop` + `crates/gitbutler-tauri` | Tauri/Svelte desktop app (product name **buti**) |
-| `apps/lite` | Electron desktop app (product name **buti**) |
-| Desktop packages (`ui-svelte`, `ui-react`, `shared`, `core`, `but-sdk`, …) | UI and SDK the desktop clients build against |
-| Rust workspace, including `but` | Engine embedded in release builds via the `builtin-but` feature |
+| `apps/desktop` | Svelte UI (product name **buti**) |
+| `crates/gitbutler-tauri` | Tauri shell |
+| `packages/ui-svelte`, `shared`, `core`, `but-sdk` | UI and types the desktop app imports |
+| `crates/` | Forked GitButler engine the shell links, including the embedded `but` binary |
 
 ## Build and run the desktop app
 
@@ -43,12 +43,6 @@ pnpm dev:desktop
 
 `pnpm dev:desktop` builds the askpass helper and the embedded `but` binary, then starts the app locally. The product name is **buti**, the same as a release build.
 
-Electron desktop:
-
-```bash
-pnpm dev:lite
-```
-
 Frontend-only production build of the Tauri UI:
 
 ```bash
@@ -62,15 +56,6 @@ pnpm tauri build --features builtin-but --config crates/gitbutler-tauri/tauri.co
 ```
 
 There is one channel. The product name is **buti** and the bundle id is `com.gitbutler.app`, so it stays the same app identity as upstream GitButler releases. The updater still points at GitButler’s release feed.
-
-Browser dev of the same Svelte UI (optional, not a separate product):
-
-```bash
-cargo run -p but-server
-pnpm dev:desktop-http
-```
-
-Open `http://localhost:1420`.
 
 ## Follow-ups
 
