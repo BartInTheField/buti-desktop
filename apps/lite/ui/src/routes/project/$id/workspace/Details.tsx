@@ -434,7 +434,7 @@ const DiffFooter: FC = () => {
 				</>
 			) : (
 				<>
-					<span>Thanks for testing GitButler Next Nightly! ❤️</span>
+					<span>Thanks for testing buti.</span>
 					<span>
 						We’d love to hear what you think.{" "}
 						<TextLink href="https://discord.gg/MmFkmaJ42D" onClick={openLinkExternally}>

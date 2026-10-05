@@ -96,7 +96,7 @@ async function webWriteTextToClipboard(text: string): Promise<void> {
 
 async function webGetAppInfo(): Promise<AppInfo> {
 	return await Promise.resolve({
-		name: "gitbutler-web",
+		name: "buti",
 		version: "0.0.0",
 	});
 }

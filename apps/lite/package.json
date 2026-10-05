@@ -1,15 +1,15 @@
 {
 	"name": "@gitbutler/lite",
 	"description": "A Git-compatible version control client - the next generation.",
-	"productName": "GitButler Next Nightly",
+	"productName": "buti",
 	"author": "GitButler Inc. <gitbutler@gitbutler.com> (https://gitbutler.com)",
 	"license": "FSL-1.1-MIT",
-	"homepage": "https://gitbutler.com",
+	"homepage": "https://github.com/BartInTheField/buti",
 	"private": true,
 	"version": "0.0.0-dev",
 	"type": "module",
 	"main": "dist/electron/main.js",
-	"copyright": "Copyright 2026 GitButler Inc",
+	"copyright": "buti, on top of GitButler. Copyright 2026 GitButler Inc",
 	"imports": {
 		"#ui/*": "./ui/src/*",
 		"#electron/*": "./electron/src/*",
@@ -106,7 +106,7 @@
 			],
 			"desktop": {
 				"entry": {
-					"Name": "GitButler Next Nightly",
+					"Name": "buti",
 					"Type": "Application",
 					"GenericName": "Version Control System"
 				}

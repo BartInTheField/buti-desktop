@@ -1,17 +1,8 @@
 name: Web App Tests
+# buti does not ship the web app. The workflow remains so upstream merges keep
+# the job, and it can still be run by hand. Push and pull_request do not start it.
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - "apps/web/**"
-      - "scripts/install.sh"
-      - ".github/workflows/test-web.yml"
-  pull_request:
-    paths:
-      - "apps/web/**"
-      - "scripts/install.sh"
-      - ".github/workflows/test-web.yml"
+  workflow_dispatch:
 
 jobs:
   test:

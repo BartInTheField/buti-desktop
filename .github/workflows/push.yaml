@@ -463,9 +463,11 @@ jobs:
       - name: "cargo check"
         run: cargo check --workspace --all-targets --features windows
 
+  # buti ships the desktop app. These CLI installer jobs stay in the workflow
+  # so merges from gitbutlerapp/gitbutler still apply; they do not run.
   build-installer:
     needs: changes
-    if: ${{ needs.changes.outputs.but_installer == 'true' }}
+    if: false
     permissions:
       contents: read
     strategy:
@@ -520,7 +522,7 @@ jobs:
 
   fetch-published-versions:
     needs: changes
-    if: ${{ needs.changes.outputs.install_script == 'true' || needs.changes.outputs.but_installer == 'true' }}
+    if: false
     runs-on: ubuntu-22.04
     permissions: {}
     outputs:
@@ -537,7 +539,7 @@ jobs:
     needs:
       - changes
       - fetch-published-versions
-    if: ${{ needs.changes.outputs.install_script == 'true' }}
+    if: false
     permissions:
       contents: read
     env:
@@ -568,6 +570,7 @@ jobs:
     needs:
       - build-installer
       - fetch-published-versions
+    if: false
     permissions:
       contents: none
     env:
@@ -604,7 +607,7 @@ jobs:
 
   publish-installer:
     needs: build-installer
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read

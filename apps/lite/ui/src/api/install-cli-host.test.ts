@@ -45,6 +45,6 @@ it("rejects non-macOS, unpackaged and uninstalled apps before calling Rust", asy
 	await expect(installCli()).rejects.toThrow("packaged macOS app");
 	app.isPackaged = true;
 	app.isInApplicationsFolder.mockReturnValue(false);
-	await expect(installCli()).rejects.toThrow("Move GitButler to Applications");
+	await expect(installCli()).rejects.toThrow("Move buti to Applications");
 	expect(installCliV2).not.toHaveBeenCalled();
 });

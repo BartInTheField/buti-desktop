@@ -1,5 +1,5 @@
 {
-	"productName": "GitButler",
+	"productName": "buti",
 	"identifier": "com.gitbutler.app",
 	"build": {
 		"beforeBuildCommand": "bash ./crates/gitbutler-tauri/tauri-before-build-command.sh production"

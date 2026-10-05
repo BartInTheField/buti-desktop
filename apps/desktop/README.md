@@ -1,5 +1,7 @@
 # Desktop application
 
+> buti, on top of GitButler. Build steps and upstream sync are in the repository [README](../../README.md).
+
 This is the main GitButler application frontend code.
 This has been built using Svelte, sweat and beers.
 

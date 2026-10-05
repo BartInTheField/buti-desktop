@@ -62,7 +62,7 @@ if (isHeadless && process.platform === "darwin") app.setActivationPolicy("access
 
 // Do this early before any APIs that depend upon it are called. Likewise take care in imported
 // modules.
-if (!app.isPackaged) app.setName("GitButler Next Dev");
+if (!app.isPackaged) app.setName("buti Dev");
 
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirPath = path.dirname(currentFilePath);
@@ -548,6 +548,7 @@ const createMainWindow = async (initialUrl?: string): Promise<void> => {
 	const icon = getWindowIcon();
 	const mainWindow = new BrowserWindow({
 		name: "main",
+		title: "buti",
 		windowStatePersistence: true,
 		width: 1024,
 		height: 768,

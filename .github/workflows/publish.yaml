@@ -1,4 +1,6 @@
 name: "Publish"
+# Desktop release jobs stay pointed at GitButler's update feed and release
+# bucket so this fork can still sync the desktop app with upstream.
 on:
   schedule:
     # every day at 1am UTC, 3AM CEST or 2AM CET.

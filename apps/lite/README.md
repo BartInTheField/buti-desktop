@@ -1,4 +1,6 @@
-# GitButler Lite
+# buti (Electron)
+
+Electron desktop client for buti, on top of GitButler. Bundle id `com.gitbutler.lite` is unchanged so it can still sync with upstream. See the repository [README](../../README.md).
 
 GitButler Lite is an Electron desktop client backed by GitButler's native Rust SDK.
 
