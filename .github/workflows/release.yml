@@ -1,0 +1,210 @@
+name: Release
+
+# Same cadence as BartInTheField/buti: hourly, and only when main has commits
+# that are not already tagged. See docs/releases.md.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build the artifacts and upload them to the workflow run, but do not publish a GitHub Release.
+        type: boolean
+        required: true
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.calver.outputs.tag }}
+      semver: ${{ steps.calver.outputs.semver }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Check CalVer helpers
+        run: |
+          ./scripts/calver.sh --test
+          ./scripts/latest-json.sh --test
+      - id: calver
+        shell: bash
+        run: |
+          tag="$(./scripts/calver.sh)"
+          if [ -z "$tag" ]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "semver=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          semver="$(./scripts/calver.sh --semver "$tag")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "semver=$semver" >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag (app version $semver)"
+
+  build:
+    needs: version
+    if: needs.version.outputs.tag != ''
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-15
+            target: ""
+          - platform: macos-15
+            target: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            target: ""
+          - platform: ubuntu-22.04-arm
+            target: ""
+          - platform: windows-latest
+            target: ""
+    steps:
+      - name: perl -V (before re-install)
+        if: runner.os == 'Windows'
+        run: which perl && perl -V
+      - name: Set git to use LF
+        if: runner.os == 'Windows'
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set Cargo build target
+        if: matrix.target != ''
+        shell: bash
+        run: |
+          echo "CARGO_BUILD_TARGET=${{ matrix.target }}" >> "$GITHUB_ENV"
+          rustup target add "${{ matrix.target }}"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - uses: ./.github/actions/init-env-node
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build desktop frontend
+        run: pnpm build:desktop -- --mode production
+        env:
+          SENTRY_RELEASE: ${{ needs.version.outputs.semver }}
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libgtk-3-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            xdg-utils
+          webkit_version='2.50.*'
+          sudo apt install -y \
+            libwebkit2gtk-4.1-0="$webkit_version" \
+            libwebkit2gtk-4.1-dev="$webkit_version" \
+            libjavascriptcoregtk-4.1-0="$webkit_version" \
+            libjavascriptcoregtk-4.1-dev="$webkit_version" \
+            gir1.2-javascriptcoregtk-4.1="$webkit_version" \
+            gir1.2-webkit2-4.1="$webkit_version"
+      - name: Build MCP apps
+        run: pnpm --filter @gitbutler/but-mcp-app build
+      - name: Build desktop app
+        shell: bash
+        env:
+          SEMVER: ${{ needs.version.outputs.semver }}
+          CHANNEL: release
+          GITBUTLER_REQUIRE_MCP_APP: "1"
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          args=(./scripts/release.sh --channel release --dist ./release --version "$SEMVER")
+          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY is unset; installers will not be updater-signed."
+            args+=(--allow-unsigned)
+          fi
+          "${args[@]}"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: desktop-${{ matrix.platform }}${{ matrix.target && format('-{0}', matrix.target) || '' }}
+          path: release/
+          if-no-files-found: error
+
+  publish:
+    needs: [version, build]
+    if: needs.version.outputs.tag != '' && (github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run == 'false')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: desktop-*
+          path: dist
+          merge-multiple: true
+      - name: Normalize artifact layout
+        shell: bash
+        run: |
+          mkdir -p layout
+          while IFS= read -r dir; do
+            name="$(basename "$dir")"
+            mkdir -p "layout/$name"
+            cp -a "$dir"/. "layout/$name/"
+          done < <(find dist -type d \( -name macos -o -name linux -o -name windows \))
+          find layout -type f | sort
+          find layout -type f | grep -q .
+      - name: Checksums
+        run: |
+          mkdir -p assets
+          find layout -type f -print0 | while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+            if [ -e "assets/$base" ]; then
+              echo "duplicate artifact name: $base"
+              exit 1
+            fi
+            cp "$file" "assets/$base"
+          done
+          (cd assets && sha256sum -- * > checksums.txt)
+      - name: Require updater signatures
+        run: |
+          if ! find layout -name '*.sig' | grep -q .; then
+            echo "No updater signatures were produced."
+            echo "Add the TAURI_SIGNING_PRIVATE_KEY and TAURI_SIGNING_PRIVATE_KEY_PASSWORD secrets, then run this workflow again."
+            echo "The installers from this run are attached as workflow artifacts."
+            exit 1
+          fi
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          SEMVER: ${{ needs.version.outputs.semver }}
+        run: |
+          gh release create "$TAG" assets/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --generate-notes
+          gh release view "$TAG" --json body --jq .body > notes.md
+          ./scripts/latest-json.sh \
+            --semver "$SEMVER" \
+            --tag "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dist layout \
+            --notes-file notes.md \
+            --output latest.json
+          if ! jq -e '(.platforms | length) > 0' latest.json >/dev/null; then
+            echo "latest.json has no platform entries."
+            exit 1
+          fi
+          gh release upload "$TAG" latest.json --clobber

@@ -8,6 +8,7 @@ PWD="$(dirname "$(readlink -f -- "$0")")"
 
 CHANNEL=""
 DO_SIGN="false"
+ALLOW_UNSIGNED="false"
 VERSION=""
 TARGET="${CARGO_BUILD_TARGET:-}"
 
@@ -21,7 +22,8 @@ function help() {
 	echo "	--version											release version." 1>&"$to"
 	echo "	--dist												path to store artifacts in." 1>&"$to"
 	echo "	--sign												if set, will sign the app." 1>&"$to"
-	echo "	--channel											the channel to use for the release (release | nightly)." 1>&"$to"
+	echo "	--allow-unsigned									build installers without updater signatures." 1>&"$to"
+	echo "	--channel											the channel to use for the release (release)." 1>&"$to"
 	echo "	--help												display this message." 1>&"$to"
 }
 
@@ -118,6 +120,10 @@ while [[ $# -gt 0 ]]; do
 		DO_SIGN="true"
 		shift
 		;;
+	--allow-unsigned)
+		ALLOW_UNSIGNED="true"
+		shift
+		;;
 	--channel)
 		CHANNEL="$2"
 		shift
@@ -134,8 +140,10 @@ ARCH="$(arch)"
 
 [ -z "${VERSION-}" ] && error "--version is not set"
 
-[ -z "${TAURI_SIGNING_PRIVATE_KEY-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY is not set"
-[ -z "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD is not set"
+if [ "$ALLOW_UNSIGNED" != "true" ]; then
+	[ -z "${TAURI_SIGNING_PRIVATE_KEY-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY is not set"
+	[ -z "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD-}" ] && error "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD is not set"
+fi
 
 if [ "$CHANNEL" != "release" ]; then
 	error "--channel must be 'release'"
@@ -199,9 +207,16 @@ else
 fi
 
 # update the version in the tauri release config
+if [ "$ALLOW_UNSIGNED" = "true" ]; then
+	UPDATER_ARTIFACTS="false"
+else
+	UPDATER_ARTIFACTS='"v1Compatible"'
+fi
+
 jq  --arg version "$VERSION"\
     --argjson externalBin "$EXTERNAL_BIN"\
-  '.version = $version | .bundle.externalBin = $externalBin' "$CONFIG_PATH" >"$TMP_DIR/tauri.conf.json"
+    --argjson updaterArtifacts "$UPDATER_ARTIFACTS"\
+  '.version = $version | .bundle.externalBin = $externalBin | .bundle.createUpdaterArtifacts = $updaterArtifacts' "$CONFIG_PATH" >"$TMP_DIR/tauri.conf.json"
 
 # Useful for understanding exactly what goes into the tauri build/bundle.
 cat "$TMP_DIR/tauri.conf.json"
@@ -244,20 +259,24 @@ mkdir -p "$RELEASE_DIR"
 if [ "$OS" = "macos" ]; then
 	MACOS_DMG="$(find "$BUNDLE_DIR/dmg" -depth 1 -type f -name "*.dmg")"
 	MACOS_UPDATER="$(find "$BUNDLE_DIR/macos" -depth 1 -type f -name "*.tar.gz")"
-	MACOS_UPDATER_SIG="$(find "$BUNDLE_DIR/macos" -depth 1 -type f -name "*.tar.gz.sig")"
+	MACOS_UPDATER="${MACOS_UPDATER%%$'\n'*}"
 
 	cp "$MACOS_DMG" "$RELEASE_DIR"
-	cp "$MACOS_UPDATER" "$RELEASE_DIR"
-	cp "$MACOS_UPDATER_SIG" "$RELEASE_DIR"
+	if [ -n "$MACOS_UPDATER" ]; then
+		cp "$MACOS_UPDATER" "$RELEASE_DIR"
+		if [ -f "${MACOS_UPDATER}.sig" ]; then
+			cp "${MACOS_UPDATER}.sig" "$RELEASE_DIR"
+		fi
+	elif [ "$ALLOW_UNSIGNED" != "true" ]; then
+		error "missing macOS updater archive"
+	fi
 
 	info "built:"
 	info "	- $RELEASE_DIR/$(basename "$MACOS_DMG")"
-	info "	- $RELEASE_DIR/$(basename "$MACOS_UPDATER")"
-	info "	- $RELEASE_DIR/$(basename "$MACOS_UPDATER_SIG")"
 elif [ "$OS" = "linux" ]; then
 	APPIMAGE="$(find "$BUNDLE_DIR/appimage" -name \*.AppImage)"
 	APPIMAGE_UPDATER="$(find "$BUNDLE_DIR/appimage" -name \*.AppImage.tar.gz)"
-	APPIMAGE_UPDATER_SIG="$(find "$BUNDLE_DIR/appimage" -name \*.AppImage.tar.gz.sig)"
+	APPIMAGE_UPDATER="${APPIMAGE_UPDATER%%$'\n'*}"
 	DEB="$(find "$BUNDLE_DIR/deb" -name \*.deb)"
 	RPM="$(find "$BUNDLE_DIR/rpm" -name \*.rpm)"
 	BUT_CLI="$(readlink -f "$BUILD_DIR/but")"
@@ -265,32 +284,40 @@ elif [ "$OS" = "linux" ]; then
 	"$PWD/add-but-symlink-to-deb.sh" "$DEB"
 
 	cp "$APPIMAGE" "$RELEASE_DIR"
-	cp "$APPIMAGE_UPDATER" "$RELEASE_DIR"
-	cp "$APPIMAGE_UPDATER_SIG" "$RELEASE_DIR"
+	if [ -n "$APPIMAGE_UPDATER" ]; then
+		cp "$APPIMAGE_UPDATER" "$RELEASE_DIR"
+		if [ -f "${APPIMAGE_UPDATER}.sig" ]; then
+			cp "${APPIMAGE_UPDATER}.sig" "$RELEASE_DIR"
+		fi
+	elif [ "$ALLOW_UNSIGNED" != "true" ]; then
+		error "missing Linux updater archive"
+	fi
 	cp "$DEB" "$RELEASE_DIR"
 	cp "$RPM" "$RELEASE_DIR"
 	cp "$BUT_CLI" "$RELEASE_DIR"
 
 	info "built:"
 	info "	- $RELEASE_DIR/$(basename "$APPIMAGE")"
-	info "	- $RELEASE_DIR/$(basename "$APPIMAGE_UPDATER")"
-	info "	- $RELEASE_DIR/$(basename "$APPIMAGE_UPDATER_SIG")"
 	info "	- $RELEASE_DIR/$(basename "$DEB")"
 	info "	- $RELEASE_DIR/$(basename "$RPM")"
 	info "	- $RELEASE_DIR/$(basename "$BUT_CLI")"
 elif [ "$OS" = "windows" ]; then
 	WINDOWS_INSTALLER="$(find "$BUNDLE_DIR/msi" -name \*.msi)"
 	WINDOWS_UPDATER="$(find "$BUNDLE_DIR/msi" -name \*.msi.zip)"
-	WINDOWS_UPDATER_SIG="$(find "$BUNDLE_DIR/msi" -name \*.msi.zip.sig)"
+	WINDOWS_UPDATER="${WINDOWS_UPDATER%%$'\n'*}"
 
 	cp "$WINDOWS_INSTALLER" "$RELEASE_DIR"
-	cp "$WINDOWS_UPDATER" "$RELEASE_DIR"
-	cp "$WINDOWS_UPDATER_SIG" "$RELEASE_DIR"
+	if [ -n "$WINDOWS_UPDATER" ]; then
+		cp "$WINDOWS_UPDATER" "$RELEASE_DIR"
+		if [ -f "${WINDOWS_UPDATER}.sig" ]; then
+			cp "${WINDOWS_UPDATER}.sig" "$RELEASE_DIR"
+		fi
+	elif [ "$ALLOW_UNSIGNED" != "true" ]; then
+		error "missing Windows updater archive"
+	fi
 
 	info "built:"
 	info "	- $RELEASE_DIR/$(basename "$WINDOWS_INSTALLER")"
-	info "	- $RELEASE_DIR/$(basename "$WINDOWS_UPDATER")"
-	info "	- $RELEASE_DIR/$(basename "$WINDOWS_UPDATER_SIG")"
 else
 	error "unsupported os: $OS"
 fi

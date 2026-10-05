@@ -1,9 +1,10 @@
 # How to Hack on buti
 
 This checkout is **buti**, on top of GitButler. The desktop source is a fork of the GitButler app.
-Display names differ from upstream. Bundle ids, the desktop update feed, and
-the desktop source layout are unchanged so this tree can merge
+Display names differ from upstream. Bundle ids and the desktop source layout
+stay aligned so this tree can merge
 [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler).
+Releases are documented in [docs/releases.md](docs/releases.md).
 See the [README](README.md) for what was trimmed and how to sync.
 
 The steps below are the upstream development guide and still apply to the desktop app.
