@@ -1,6 +1,6 @@
 {
-	"productName": "buti Dev",
-	"identifier": "com.gitbutler.app.dev",
+	"productName": "buti",
+	"identifier": "com.gitbutler.app",
 	"build": {
 		"beforeDevCommand": "pnpm dev:internal-tauri",
 		"beforeBuildCommand": "[ \"$CI\" = \"true\" ] || pnpm build:desktop -- --mode development",
@@ -14,11 +14,11 @@
 		"createUpdaterArtifacts": "v1Compatible",
 		"targets": ["app", "dmg", "appimage", "deb", "rpm", "msi"],
 		"icon": [
-			"icons/dev/32x32.png",
-			"icons/dev/128x128.png",
-			"icons/dev/128x128@2x.png",
-			"icons/dev/icon.icns",
-			"icons/dev/icon.ico"
+			"icons/release/32x32.png",
+			"icons/release/128x128.png",
+			"icons/release/128x128@2x.png",
+			"icons/release/icon.icns",
+			"icons/release/icon.ico"
 		],
 		"windows": {
 			"certificateThumbprint": null
@@ -44,13 +44,13 @@
 	"plugins": {
 		"updater": {
 			"endpoints": [
-				"https://app.gitbutler.com/releases/nightly/{{target}}-{{arch}}/{{current_version}}"
+				"https://app.gitbutler.com/releases/release/{{target}}-{{arch}}/{{current_version}}"
 			],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYwNTc2RDhBM0U0MjM4RUIKUldUck9FSStpbTFYWUE5UkJ3eXhuekZOL2V2RnpKaFUxbGJRNzBMVmF5V0gzV1JvN3hRblJMRDIK"
 		},
 		"deep-link": {
       "desktop": {
-        "schemes": ["but-dev"]
+        "schemes": ["but"]
       }
     }
 	},

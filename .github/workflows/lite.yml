@@ -1,7 +1,5 @@
 name: "Lite"
 on:
-  schedule:
-    - cron: "0 2 * * *"
   workflow_dispatch: {}
 
 env:
@@ -29,7 +27,7 @@ jobs:
       CARGO_PROFILE_RELEASE_LTO: fat
       CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
       CARGO_PROFILE_RELEASE_OPT_LEVEL: 3
-      CHANNEL: nightly
+      CHANNEL: release
       VERSION: "0.0.${{ github.run_number }}"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -52,7 +50,7 @@ jobs:
       - name: Build but CLI
         env:
           GITBUTLER_REQUIRE_MCP_APP: "1"
-        run: cargo build --release --locked --offline -p but --features "packaged-but-distribution,nightly"
+        run: cargo build --release --locked --offline -p but --features packaged-but-distribution
       - name: Copy but CLI into Lite resources
         shell: bash
         run: |

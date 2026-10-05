@@ -52,7 +52,7 @@ pnpm install
 pnpm dev:desktop
 ```
 
-`pnpm dev:desktop` builds the askpass helper and the embedded `but` binary, then starts the Tauri dev app. The window title and macOS app menu use **buti Dev**.
+`pnpm dev:desktop` builds the askpass helper and the embedded `but` binary, then starts the app locally. The product name is **buti**, the same as a release build.
 
 Electron desktop:
 
@@ -66,13 +66,13 @@ Frontend-only production build of the Tauri UI:
 pnpm build:desktop
 ```
 
-A local installable Tauri build (nightly-style, updater still pointed at GitButler):
+Release build:
 
 ```bash
-pnpm tauri build --features devtools,builtin-but,disable-auto-updates,nightly --config crates/gitbutler-tauri/tauri.conf.nightly-local.json
+pnpm tauri build --features builtin-but --config crates/gitbutler-tauri/tauri.conf.release.json
 ```
 
-Release packaging uses `crates/gitbutler-tauri/tauri.conf.release.json`. The product name is **buti**. The bundle id stays `com.gitbutler.app`, so it installs as the same app identity upstream uses.
+There is one channel. The product name is **buti** and the bundle id is `com.gitbutler.app`, so it stays the same app identity as upstream GitButler releases. The updater still points at GitButler’s release feed.
 
 Browser dev of the same Svelte UI (optional, not a separate product):
 

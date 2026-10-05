@@ -93,7 +93,7 @@ pnpm build
 pnpm build:desktop
 
 # Build for production (used for releases)
-pnpm tauri build --features devtools --config crates/gitbutler-tauri/tauri.conf.nightly.json
+pnpm tauri build --features builtin-but --config crates/gitbutler-tauri/tauri.conf.release.json
 ```
 
 ## Testing

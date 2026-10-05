@@ -62,7 +62,7 @@ if (isHeadless && process.platform === "darwin") app.setActivationPolicy("access
 
 // Do this early before any APIs that depend upon it are called. Likewise take care in imported
 // modules.
-if (!app.isPackaged) app.setName("buti Dev");
+if (!app.isPackaged) app.setName("buti");
 
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirPath = path.dirname(currentFilePath);
@@ -627,12 +627,7 @@ export const start = async (shellEnvironment: Promise<Record<string, string>>): 
 	Object.assign(process.env, await shellEnvironment);
 	await initApplicationNamespace(null);
 	if (app.isPackaged) {
-		const channel = process.env.CHANNEL;
-		await initMetrics(
-			app.getVersion(),
-			"production",
-			channel === "nightly" || channel === "release" ? channel : "dev",
-		);
+		await initMetrics(app.getVersion(), "production", "release");
 	}
 
 	applyGUISettings(await readSettings());

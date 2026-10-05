@@ -30,7 +30,6 @@
 		"test:e2e": "pnpm prepare-askpass --debug && pnpm build:electron && playwright test --config ./e2e/playwright.config.ts",
 		"bundle": "pnpm build && pnpm prepare-askpass && electron-builder",
 		"bundle-local": "CHANNEL=${CHANNEL:-} pnpm -F @gitbutler/but-sdk build && CHANNEL=${CHANNEL:-} pnpm bundle -c.mac.identity=- -c.mac.entitlements=resources/entitlements.mac.local.plist -c.mac.entitlementsInherit=resources/entitlements.mac.local.plist",
-		"bundle-local-nightly": "CHANNEL=nightly pnpm -F @gitbutler/but-sdk build:release && CHANNEL=nightly pnpm bundle -c.mac.identity=- -c.mac.entitlements=resources/entitlements.mac.local.plist -c.mac.entitlementsInherit=resources/entitlements.mac.local.plist",
 		"demos": "storybook dev --no-open -p 6007",
 		"build-storybook": "storybook build",
 		"chromatic": "chromatic --build-script-name build-storybook --only-changed --exit-zero-on-changes --auto-accept-changes master --exit-once-uploaded",
@@ -111,7 +110,7 @@
 					"GenericName": "Version Control System"
 				}
 			},
-			"executableName": "gitbutler-next-nightly"
+			"executableName": "buti"
 		},
 		"win": {
 			"icon": "resources/icons/windows/icon.ico",
@@ -121,7 +120,7 @@
 			"publish": []
 		},
 		"deb": {
-			"packageName": "gitbutler-next-nightly",
+			"packageName": "buti",
 			"artifactName": "${productName}-${version}-${arch}.${ext}",
 			"depends": [
 				"libnotify4",

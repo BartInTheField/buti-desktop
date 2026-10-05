@@ -325,13 +325,13 @@ If none of these solutions work, please check our [GitHub Issues](https://github
 
 ## Building
 
-To build the app in production mode, run:
+To build the release app, run:
 
 ```bash
-$ pnpm tauri build --features devtools,builtin-but,disable-auto-updates,nightly --config crates/gitbutler-tauri/tauri.conf.nightly-local.json
+$ pnpm tauri build --features builtin-but --config crates/gitbutler-tauri/tauri.conf.release.json
 ```
 
-This will make an asset similar to our nightly build.
+This fork ships that release build only. The product name is `buti`.
 
 ### Building on Windows
 
@@ -385,13 +385,13 @@ export CARGO_BUILD_TARGET=x86_64-pc-windows-msvc
 export OPENSSL_SRC_PERL="c:/Strawberry/perl/bin/perl.exe"
 ```
 
-Here is how to produce a nightly release build:
+Here is how to produce a release build:
 
 ```
-pnpm tauri build --features windows,devtools,nightly --config  crates/gitbutler-tauri/tauri.conf.nightly.json
+pnpm tauri build --features windows,builtin-but --config crates/gitbutler-tauri/tauri.conf.release.json
 ```
 
-And this is how to get a local developer debug build:
+And this is how to run the app locally:
 
 ```bash
 pnpm tauri dev --features windows --target x86_64-pc-windows-msvc
