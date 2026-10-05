@@ -11,7 +11,7 @@
   On top of <strong>GitButler</strong>
 </p>
 
-The wordmark is `buti`, lowercase, from [BartInTheField/buti](https://github.com/BartInTheField/buti). This repository is the desktop app: a [Tauri](https://tauri.app/) and Svelte client, plus the Electron desktop client. It is a fork of [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler). The intended repository name is [`BartInTheField/buti-desktop`](https://github.com/BartInTheField/buti-desktop). Upstream license notices stay in [`LICENSE.md`](LICENSE.md) (Functional Source License 1.1, with a future MIT grant).
+The wordmark is `buti`, lowercase, from [BartInTheField/buti](https://github.com/BartInTheField/buti). This repository is the desktop app: a [Tauri](https://tauri.app/) and Svelte client, plus the Electron desktop client. It is a fork of [gitbutlerapp/gitbutler](https://github.com/gitbutlerapp/gitbutler), published as [`BartInTheField/buti-desktop`](https://github.com/BartInTheField/buti-desktop). Upstream license notices stay in [`LICENSE.md`](LICENSE.md) (Functional Source License 1.1, with a future MIT grant).
 
 ## Sync with upstream
 
@@ -44,8 +44,6 @@ Nothing was deleted from the workspace. Crate names and npm package names stay `
 ## Build and run the desktop app
 
 Prerequisites are the upstream desktop setup: Rust, pnpm (it installs Node), and the Tauri system packages listed in [DEVELOPMENT.md](DEVELOPMENT.md).
-
-Until the GitHub rename, clone this fork as `gitbutler`. After the rename:
 
 ```bash
 git clone https://github.com/BartInTheField/buti-desktop.git
@@ -87,7 +85,6 @@ Open `http://localhost:1420`.
 
 ## Follow-ups
 
-- GitHub repository rename to `BartInTheField/buti-desktop`.
 - App icons use the buti mark from `brand/mark.svg`. At 16px the commit dot is dropped, matching the brand note.
 - There is no system tray. The dock, taskbar, and window title follow the product name `buti`.
 - In-app Help links still open upstream docs and `gitbutlerapp/gitbutler`.
